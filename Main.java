@@ -11,5 +11,7 @@ public class Main {
         g.setVertices(List.of(v1, v2, v3));
         g.setArestas(List.of(a1, a2));
         System.out.println(g);
+        g.exibirMatrizAdjacencia();
+        g.exibirMatrizIncidencia();
     }
 }
