@@ -118,4 +118,70 @@ public class Grafo {
     public String toString() {
         return "\nisDirecionado: " + isDirecionado + "\nvertices: " + vertices + "\narestas: " + arestas + "\nordem:" + ordem + "\ntamanho: " + tamanho;
     }
+
+    public void exibirMatrizAdjacencia() {
+        int n = vertices.size();
+        int[][] matriz = new int[n][n];
+
+        for (Aresta aresta : arestas) {
+            int i = vertices.indexOf(aresta.getOrigem());
+            int j = vertices.indexOf(aresta.getDestino());
+            matriz[i][j] = 1;
+
+            if (!isDirecionado) {
+                matriz[j][i] = 1;
+            }
+        }
+
+        System.out.println("Matriz de Adjacência:");
+        System.out.println("     ");
+        for (Vertice v : vertices) {
+            System.out.print(v.getNome() + " ");
+        }
+        System.out.println();
+
+        for (int i = 0; i < n; i++) {
+            System.out.print(vertices.get(i).getNome() + " | ");
+            for (int j = 0; j < n; j++) {
+                System.out.print(matriz[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public void exibirMatrizIncidencia() {
+        int numVertices = vertices.size();
+        int numArestas = arestas.size();
+        int[][] matriz = new int[numVertices][numArestas];
+
+        for (int j = 0; j < numArestas; j++) {
+            Aresta aresta = arestas.get(j);
+            int origemIndex = vertices.indexOf(aresta.getOrigem());
+            int destinoIndex = vertices.indexOf(aresta.getDestino());
+
+            if (isDirecionado) {
+                matriz[origemIndex][j] = -1;
+                matriz[destinoIndex][j] = 1;
+            } else {
+                matriz[origemIndex][j] = 1;
+                matriz[destinoIndex][j] = 1;
+            }
+        }
+
+        System.out.println("Matriz de Incidência:");
+        System.out.print("    ");
+        for (int j = 0; j < numArestas; j++) {
+            String nomeAresta = arestas.get(j).getNome();
+            System.out.print((nomeAresta != null ? nomeAresta : "e" + (j + 1)) + " ");
+        }
+        System.out.println();
+
+        for (int i = 0; i < numVertices; i++) {
+            System.out.print(vertices.get(i).getNome() + " | ");
+            for (int j = 0; j < numArestas; j++) {
+                System.out.print(matriz[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
 }
