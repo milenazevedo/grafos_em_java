@@ -1,7 +1,11 @@
+import lombok.*;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+
+@Getter
+@Setter
 public class Vertice {
     private String nome;
     private List<Vertice> adjacencias = new ArrayList<>();
@@ -13,77 +17,34 @@ public class Vertice {
         this.nome = nome;
     }
 
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public List<Vertice> getAdjacencias() {
-        return adjacencias;
-    }
-
-    public void setAdjacencias(List<Vertice> adjacencias) {
-        this.adjacencias = adjacencias;
-    }
-
-    public int getGrau() {
-        return grau;
-    }
-
-    public void setGrau(int grau) {
-        this.grau = grau;
-    }
-
-    public int getInDegree() {
-        return inDegree;
-    }
-
-    public void setInDegree(int inDegree) {
-        this.inDegree = inDegree;
-    }
-
-    public int getOutDegree() {
-        return outDegree;
-    }
-
-    public void setOutDegree(int outDegree) {
-        this.outDegree = outDegree;
-    }
-
     public void addAdjacencia(Vertice vertice) {
         adjacencias.add(vertice);
     }
-
-    public void incrementaGrau() {
+    public void incrementaGrau(){
         grau++;
     }
-
-    public void incrementaInDegree() {
+    public void incrementaInDegree(){
         inDegree++;
     }
-
-    public void incrementaOutDegree() {
+    public void incrementaOutDegree(){
         outDegree++;
     }
 
     @Override
+
     public String toString() {
-        String adjacenciasStr = adjacencias.stream()
+        return toString(false); // default se chamado sem argumento
+    }
+
+    public String toString(boolean isDirecionado) {
+        List<String> nomesAdjacentes = adjacencias.stream()
                 .map(Vertice::getNome)
-                .collect(Collectors.joining(", "));
-
-        String grauInfo = "grau: " + grau;
-        if (isDirecionado()) {
-            grauInfo += ", inDegree: " + inDegree + ", outDegree: " + outDegree;
+                .toList();
+        if (isDirecionado) {
+            return nome + " (in: " + inDegree + ", out: " + outDegree + ", grau: " + grau + ", adjacencias: " + nomesAdjacentes + ")";
+        } else {
+            return nome + " (grau: " + grau + ", adjacencias: " + nomesAdjacentes + ")";
         }
-
-        return nome + " (" + grauInfo + ", adjacencias: [" + adjacenciasStr + "])";
     }
 
-    private boolean isDirecionado() {
-        return inDegree > 0 || outDegree > 0;
-    }
 }
