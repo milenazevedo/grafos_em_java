@@ -1,25 +1,29 @@
+// importações
 import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Getter
 @Setter
 public class Vertice {
     private String nome;
-    private List<Vertice> adjacencias = new ArrayList<>();
-    private int grau;
-    private int inDegree;
-    private int outDegree;
+    private List<Vertice> adjacencias = new ArrayList<>(); // cria uma lista que guarda os vértices ligados a esse vértice
+    private int grau; // numero total de conexões
+    private int inDegree; // vertices que chegam a este vertice
+    private int outDegree; // vertices que saem do vértice
 
+    // construtor do vértice
     public Vertice(String nome) {
         this.nome = nome;
     }
 
+    // metodo para adicionar um novo vértice a lista de adjacencias
     public void addAdjacencia(Vertice vertice) {
-        adjacencias.add(vertice);
+        if (!adjacencias.contains(vertice)) {
+            adjacencias.add(vertice);
+        }
     }
+
     public void incrementaGrau(){
         grau++;
     }
@@ -31,9 +35,8 @@ public class Vertice {
     }
 
     @Override
-
     public String toString() {
-        return toString(false); // default se chamado sem argumento
+        return toString(false);
     }
 
     public String toString(boolean isDirecionado) {

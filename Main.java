@@ -1,36 +1,106 @@
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Grafo g = new Grafo();
-        Vertice v1 = new Vertice("A");
-        Vertice v2 = new Vertice("B");
-        Vertice v3 = new Vertice("C");
+        Scanner entrada = new Scanner(System.in);
+        Grafo grafo = new Grafo();
+        grafo.setVertices(new ArrayList<>());
+        grafo.setArestas(new ArrayList<>());
 
-        // Agora as arestas têm pesos
-        Aresta a1 = new Aresta(v2, v1, 2.5);  // Peso 2.5
-        Aresta a2 = new Aresta(v1, v3, 4.0);  // Peso 4.0
+        int opcao;
 
-        g.setVertices(List.of(v1, v2, v3));
-        g.setArestas(List.of(a1, a2));
+        do {
+            System.out.println("\n-------- MENU --------");
+            System.out.println("1. Adicionar vértice");
+            System.out.println("2. Adicionar aresta");
+            System.out.println("3. Descrição do grafo");
+            System.out.println("4. Grau, ordem e tamnho");
+            System.out.println("5. Matriz de Adjacência");
+            System.out.println("6. Matriz de Incidência");
+            System.out.println("7. Caminhada");
+            System.out.println("8. Busca em profundidade");
+            System.out.println("0. Sair");
+            System.out.println("Escolha uma opção: ");
 
-        System.out.println(g);
+            opcao = entrada.nextInt();
+            entrada.nextLine();
 
-        // Exibindo as matrizes
-        g.imprimirMatrizAdjacencia();
-        g.imprimirMatrizIncidencia();
+            switch (opcao) {
+                case 1:
+                    System.out.println("Nome do vértice: ");
+                    String nome = entrada.nextLine();
+                    Vertice novo = new Vertice(nome);
+                    grafo.getVertices().add(novo);
+                    grafo.setVertices(grafo.getVertices());
+                    break;
+                case 2:
+                    System.out.println("Vértice de origem: ");
+                    String origemNome = entrada.nextLine();
+                    System.out.println("Vértice de destino: ");
+                    String destinoNome = entrada.nextLine();
+                    System.out.println("Peso da aresta: ");
+                    double peso = entrada.nextDouble();
+                    entrada.nextLine();
 
-        System.out.println("Existe caminho simples de v2 para v3? " + g.existeCaminhoSimples(v2, v3));
-        System.out.println("Existe caminho simples de v3 para v2? " + g.existeCaminhoSimples(v3, v2));
+                    Vertice origem = grafo.buscarVertice(origemNome);
+                    Vertice destino = grafo.buscarVertice(destinoNome);
 
-        double comprimento = g.comprimentoDoCaminho(v2, v3);
-        System.out.println("Comprimento do caminho de v2 até v3: " + comprimento);
+                    if (origem != null && destino != null) {
+                        Aresta aresta = new Aresta(origem, destino, peso);
+                        grafo.getArestas().add(aresta);
+                        grafo.setArestas(grafo.getArestas());
+                    } else {
+                        System.out.println("Vértice(s) não encontrado(s)!");
+                    }
+                    break;
+                case 3:
+                    System.out.println(grafo.descricao());
+                    break;
+                case 4:
+                    System.out.println("Ordem do grafo (número de vértices): " + grafo.getOrdem());
+                    System.out.println("Tamanho do grafo (número de arestas): " + grafo.getTamanho());
+                    System.out.println("Grau do grafo (soma dos graus dos vértices): " + grafo.grauTotal());
+                    break;
+                case 5:
+                    grafo.imprimirMatrizAdjacencia();
+                    break;
+                case 6:
+                    grafo.imprimirMatrizIncidencia();
+                    break;
+                case 7:
+                    System.out.println("Nome do vértice inicial: ");
+                    String nomeV = entrada.nextLine();
+                    int indice = grafo.indiceVertice(nomeV);
+                    if (indice != -1) {
+                        grafo.dfs(indice, -1);
+                    } else {
+                        System.out.println("Vértice não encontrado.");
+                    }
+                    break;
+                case 8:
+                    System.out.println("Vértice de origem: ");
+                    String nomeOrigem = entrada.nextLine();
+                    System.out.println("Vértice de destino: ");
+                    String nomeDestino = entrada.nextLine();
+                    int indiceOrigem = grafo.indiceVertice(nomeOrigem);
+                    int indiceDestino = grafo.indiceVertice(nomeDestino);
 
-        List<Vertice> caminhoMaisCurto = g.identificarCaminhoMaisCurto(v2, v3);
+                    if (indiceOrigem != -1 && indiceDestino != -1) {
+                        grafo.dfs(indiceOrigem, indiceDestino);
+                    } else {
+                        System.out.println("Um dos vértices não foi enconntrado.");
+                    }
+                    break;
+                case 0:
+                    System.out.println("Encerrando...");
+                    break;
+                default:
+                    System.out.println("Opção inválida.");
+                    break;
+            }
 
-        System.out.println("Caminho mais curto de B até C: ");
-        for (Vertice v : caminhoMaisCurto) {
-            System.out.print(v.getNome() + " ");
-        }
+        } while (opcao != 0);
+
     }
 }

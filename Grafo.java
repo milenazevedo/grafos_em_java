@@ -1,3 +1,4 @@
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -5,6 +6,7 @@ import java.util.*;
 
 @NoArgsConstructor
 @Setter
+@Getter
 public class Grafo {
     private boolean isDirecionado;
     private List<Vertice> vertices;
@@ -169,22 +171,47 @@ public class Grafo {
         }
     }
 
-    public boolean existeCaminhoSimples(Vertice origem, Vertice destino) {
-        Set<Vertice> visitados = new HashSet<>();
-        return dfs(origem, destino, visitados);
+    public void dfs(int origem, int destino) {
+        if (vertices == null || origem < 0 || destino < 0 ||
+                origem >= vertices.size() || destino >= vertices.size()) {
+            System.out.println("Índice inválido.");
+            return;
+        }
+
+        List<List<Integer>> adjVertices = construirListaAdjacenciaPorIndice();
+        boolean[] isVisited = new boolean[vertices.size()];
+
+        if (!dfsComDestino(origem, destino, isVisited, adjVertices)) {
+            System.out.println("Caminho de " + vertices.get(origem).getNome() +
+                    " até " + vertices.get(destino).getNome() + " não encontrado.");
+        }
     }
 
-    private boolean dfs(Vertice atual, Vertice destino, Set<Vertice> visitados) {
-        if (atual.equals(destino)) {
+
+    private void dfsRecursive(int current, boolean[] isVisited, List<List<Integer>> adjVertices) {
+        isVisited[current] = true;
+        visit(current); // você pode mudar isso se quiser fazer outra coisa com o vértice
+
+        for (int dest : adjVertices.get(current)) {
+            if (!isVisited[dest]) {
+                dfsRecursive(dest, isVisited, adjVertices);
+            }
+        }
+    }
+
+    private boolean dfsComDestino(int current, int destino, boolean[] isVisited, List<List<Integer>> adjVertices) {
+        isVisited[current] = true;
+        visit(current);
+
+        if (current == destino) {
+            System.out.println("Destino encontrado!");
             return true;
         }
 
-        visitados.add(atual);
-
-        for (Vertice vizinho : atual.getAdjacencias()) {
-            if (!visitados.contains(vizinho)) {
-                if (dfs(vizinho, destino, visitados)) {
-                    return true;
+        for (int adj : adjVertices.get(current)) {
+            if (!isVisited[adj]) {
+                if (dfsComDestino(adj, destino, isVisited, adjVertices)) {
+                    return true; // já encontrou, não precisa continuar
                 }
             }
         }
@@ -192,143 +219,74 @@ public class Grafo {
         return false;
     }
 
-    public double comprimentoDoCaminho(Vertice origem, Vertice destino) {
-        if (isDirecionado || contemPesosReais()) {
-            return caminhoPonderado(origem, destino);
-        } else {
-            return caminhoNaoPonderado(origem, destino);
+    private List<List<Integer>> construirListaAdjacenciaPorIndice() {
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i < vertices.size(); i++) {
+            adj.add(new ArrayList<>());
         }
-    }
 
-    private boolean contemPesosReais() {
-        return arestas.stream().anyMatch(a -> a.getPeso() != 1.0);
-    }
+        for (Aresta aresta : arestas) {
+            int origem = vertices.indexOf(aresta.getOrigem());
+            int destino = vertices.indexOf(aresta.getDestino());
 
-    private int caminhoNaoPonderado(Vertice origem, Vertice destino) {
-        Queue<Vertice> fila = new LinkedList<>();
-        Map<Vertice, Integer> distancias = new HashMap<>();
-
-        fila.add(origem);
-        distancias.put(origem, 0);
-
-        while (!fila.isEmpty()) {
-            Vertice atual = fila.poll();
-            int distAtual = distancias.get(atual);
-
-            if (atual.equals(destino)) {
-                return distAtual;
-            }
-
-            for (Vertice vizinho : atual.getAdjacencias()) {
-                if (!distancias.containsKey(vizinho)) {
-                    distancias.put(vizinho, distAtual + 1);
-                    fila.add(vizinho);
-                }
+            adj.get(origem).add(destino);
+            if (!isDirecionado) {
+                adj.get(destino).add(origem);
             }
         }
 
-        return -1;
+        return adj;
     }
 
-    private double caminhoPonderado(Vertice origem, Vertice destino) {
-        Map<Vertice, Double> distancias = new HashMap<>();
-        PriorityQueue<VerticeDistancia> fila = new PriorityQueue<>(Comparator.comparingDouble(v -> v.distancia));
-        Set<Vertice> visitados = new HashSet<>();
+    private void visit(int index) {
+        System.out.println("Visitando: " + vertices.get(index).getNome());
+    }
 
+    public Vertice buscarVertice(String nome) {
         for (Vertice v : vertices) {
-            distancias.put(v, Double.MAX_VALUE);
-        }
-
-        distancias.put(origem, 0.0);
-        fila.add(new VerticeDistancia(origem, 0.0));
-
-        while (!fila.isEmpty()) {
-            VerticeDistancia atual = fila.poll();
-            if (!visitados.add(atual.vertice)) continue;
-
-            if (atual.vertice.equals(destino)) {
-                return atual.distancia;
-            }
-
-            for (Vertice vizinho : atual.vertice.getAdjacencias()) {
-                double peso = pesoDaAresta(atual.vertice, vizinho);
-                double novaDist = atual.distancia + peso;
-
-                if (novaDist < distancias.get(vizinho)) {
-                    distancias.put(vizinho, novaDist);
-                    fila.add(new VerticeDistancia(vizinho, novaDist));
-                }
+            if (v.getNome().equalsIgnoreCase(nome)) {
+                return v;
             }
         }
+        return null;
+    }
 
+    public int indiceVertice(String nome) {
+        for (int i = 0; i < vertices.size(); i++) {
+            if (vertices.get(i).getNome().equalsIgnoreCase(nome)) {
+                return i;
+            }
+        }
         return -1;
     }
 
-    private double pesoDaAresta(Vertice origem, Vertice destino) {
+    public String descricao() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nGrafo ").append(isDirecionado ? "direcionado" : "não direcionado");
+        sb.append("\nVértices:\n");
+        for (Vertice v : vertices) {
+            sb.append("  ").append(v.toString(isDirecionado)).append("\n");
+        }
+        sb.append("Arestas:\n");
         for (Aresta a : arestas) {
-            if (a.getOrigem().equals(origem) && a.getDestino().equals(destino)) {
-                return a.getPeso();
-            }
-            if (!isDirecionado && a.getOrigem().equals(destino) && a.getDestino().equals(origem)) {
-                return a.getPeso();
-            }
+            sb.append("  ").append(a.toString()).append(" peso: ").append(a.getPeso()).append("\n");
         }
-        return Double.MAX_VALUE;
+        return sb.toString();
     }
 
-    private static class VerticeDistancia {
-        Vertice vertice;
-        double distancia;
-
-        public VerticeDistancia(Vertice vertice, double distancia) {
-            this.vertice = vertice;
-            this.distancia = distancia;
-        }
-    }
-
-    public List<Vertice> identificarCaminhoMaisCurto(Vertice origem, Vertice destino) {
-        Map<Vertice, Double> distancias = new HashMap<>();
-        Map<Vertice, Vertice> predecessores = new HashMap<>();
-        PriorityQueue<VerticeDistancia> fila = new PriorityQueue<>(Comparator.comparingDouble(v -> v.distancia));
-        Set<Vertice> visitados = new HashSet<>();
-
+    public int grauTotal() {
+        int grau = 0;
         for (Vertice v : vertices) {
-            distancias.put(v, Double.MAX_VALUE);
+            grau += v.getGrau(); // para grafos direcionados ou não
         }
-
-        distancias.put(origem, 0.0);
-        fila.add(new VerticeDistancia(origem, 0.0));
-
-        while (!fila.isEmpty()) {
-            VerticeDistancia atual = fila.poll();
-            if (!visitados.add(atual.vertice)) continue;
-
-            if (atual.vertice.equals(destino)) {
-                return reconstruirCaminho(predecessores, destino);
-            }
-
-            for (Vertice vizinho : atual.vertice.getAdjacencias()) {
-                double peso = pesoDaAresta(atual.vertice, vizinho);
-                double novaDist = atual.distancia + peso;
-
-                if (novaDist < distancias.get(vizinho)) {
-                    distancias.put(vizinho, novaDist);
-                    predecessores.put(vizinho, atual.vertice);
-                    fila.add(new VerticeDistancia(vizinho, novaDist));
-                }
-            }
-        }
-
-        return new ArrayList<>();
+        return grau;
     }
 
-    private List<Vertice> reconstruirCaminho(Map<Vertice, Vertice> predecessores, Vertice destino) {
-        List<Vertice> caminho = new ArrayList<>();
-        for (Vertice v = destino; v != null; v = predecessores.get(v)) {
-            caminho.add(v);
-        }
-        Collections.reverse(caminho);
-        return caminho;
-    }
+
+
+
+
+
+
 
 }

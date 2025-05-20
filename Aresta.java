@@ -1,7 +1,7 @@
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
+@AllArgsConstructor // cria construtor com todos os atributos
 @Getter
 public class Aresta {
     private String nome;
